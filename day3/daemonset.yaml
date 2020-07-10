@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    run: ds-nginx
+  name: ds-nginx
+spec:
+  selector:
+    matchLabels:
+      run: ds-nginx
+  template:
+    metadata:
+      labels:
+        run: ds-nginx
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: IfNotPresent
+        name: ds-nginx

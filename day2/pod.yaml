@@ -1,0 +1,14 @@
+#kubectl run nginx --image=nginx --generator=run-pod/v1 --dry-run -o yaml
+#kubectl run nginx --image=nginx --generator=run-pod/v1 -l "app=nginx" --dry-run -o yaml
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: nginx
+  name: nginx-pod
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx

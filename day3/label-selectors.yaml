@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    application: nginx
+  name: label-selector
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      application: nginx
+  template:
+    metadata:
+      labels:
+        application: nginx
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: IfNotPresent
+        name: nginx

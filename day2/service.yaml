@@ -1,0 +1,18 @@
+#kubectl expose pod nginx-pod --port=80 --target-port=80 --name=nginx-svc --dry-run -o yaml
+#kubectl expose pod nginx-pod --port=80 --target-port=80 --name=nginx-svc --type=NodePort --dry-run -o yaml
+#kubectl expose pod nginx-pod --port=80 --target-port=80 --name=nginx-svc --type=ClusterIP --protocol=TCP  --dry-run -o yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+  name: nginx-svc
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  type: NodePort
