@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+    tier: frontend
+  name: rolling-update
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+      tier: frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nginx
+        tier: frontend
+    spec:
+      containers:
+      - image: nginx:1.7.0
+        name: rolling-update
+        resources: {}

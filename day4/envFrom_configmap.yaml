@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-web-color-configmap
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 30102
+  selector:
+    run: simple-web-color-configmap
+  type: NodePort
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: simple-web-color
+  name: simple-web-color-configmap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: simple-web-color-configmap
+  template:
+    metadata:
+      labels:
+        run: simple-web-color-configmap
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+             name: app-config
+        image: mmumshad/simple-webapp-color
+        name: simple-web-color
+        ports:
+        - containerPort: 8080
+        resources: {}

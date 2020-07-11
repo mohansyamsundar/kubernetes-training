@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  environment: test
+  application: simple-web-color
+  APP_COLOR: blue
