@@ -1,0 +1,15 @@
+OS Upgrades
+-----------
+Step 1:
+
+Take worker-1 node out for maitainence
+#kubectl drain worker-1 --ignore-daemonsets
+
+Note: If we run the pods that are not part of replicaset, we lost for ever and also must be add --force while taking node out for maitainence 
+
+Step 2:
+Apply Patching
+
+Step 3:
+Schedule the Node back again
+#kubectl uncordon worker-1
