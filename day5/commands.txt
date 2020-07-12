@@ -1,0 +1,96 @@
+OS Upgrades
+-----------
+Step 1:
+
+Take worker-1 node out for maitainence
+#kubectl drain worker-1 --ignore-daemonsets
+
+Note: If we run the pods that are not part of replicaset, we lost for ever and also must be add --force while taking node out for maitainence 
+
+Step 2:
+Apply Patching
+
+Step 3:
+Schedule the Node back again
+#kubectl uncordon worker-1
+
+Cluster Upgrade Process
+-----------------------
+Step1: Check the Latest Stable Version
+#kubectl upgrade plan
+
+Step2: Drain the node one at a time to avoid application downtime. Drain the workload on the master and mark it Unschedulable
+#kubectl drain master --ignore-daemonsets
+
+Step3: Upgrade kubelet & Kubeadm version to latest stable version
+#apt install kubeadm=1.18.0-00 kubelet=1.18.0-00
+
+Step4: Check the Kubelet & kubeadm version
+#kubeadm version
+#kubelet --version
+
+Step5: Updagrade kubernetes version to 1.18.0
+#kubeadm upgrade apply v1.18.0
+
+Step6: Verify the version updated on master
+#kubectl get nodes
+
+Step7: Schedule the master node
+#kubectl uncordon master;kubectl get nodes
+
+Step8: Drain the worker node of the workloads and mark it UnSchedulable
+#kubectl drain node01 --ignore-daemonsets
+
+Step9: Upgrade the worker node to the exact version
+#ssh node01
+#apt install kubeadm=1.18.0-00 kubelet=1.18.0-00
+
+Step10: Upgrade the worker node & mark it schedulable.
+#kubeadm upgrade node
+
+Step11: Mark the Node schedulable from master node
+#kubectl uncordon node01
+
+ETCD Backup & Restoration
+-------------------------
+Backup:
+
+ETCDCTL_API=3 etcdctl snapshot save snapshot.db
+                 (or)
+ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /tmp/snapshot.db
+
+ETCDCTL_API=3 etcdctl snapshot status /tmp/snapshot.db  -w table
+
+
+Restoration:
+# Restore the snapshot to the new folder
+ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+     --name=master \
+     --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key \
+     --data-dir /var/lib/etcd-from-backup \
+     --initial-cluster=master=https://127.0.0.1:2380 \
+     --initial-cluster-token=etcd-cluster-1 \
+     --initial-advertise-peer-urls=https://127.0.0.1:2380 \
+     snapshot restore /tmp/snapshot-pre-boot.db
+
+# Update the data directory and cluster token on /etc/kubernetes/manifests/etcd.yaml
+--data-dir=/var/lib/etcd-from-backup
+--initial-cluster-token=etcd-cluster-1
+
+#Update volumes and volume mounts to point to new path
+volumeMounts:
+    - mountPath: /var/lib/etcd-from-backup
+      name: etcd-data
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+  hostNetwork: true
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /var/lib/etcd-from-backup
+      type: DirectoryOrCreate
+    name: etcd-data
+  - hostPath:
+      path: /etc/kubernetes/pki/etcd
+      type: DirectoryOrCreate
+    name: etcd-certs
