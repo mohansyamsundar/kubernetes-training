@@ -1,0 +1,36 @@
+Create Private key
+------------------
+openssl genrsa -out syamsundar.key 2048
+
+Create CSR
+----------
+openssl req -new -key syamsundar.key -subj "/CN=syamsundar" -out syamsundar.csr
+
+
+Generate Kubeconfig for syamsundar user
+--------------------------------------
+
+{
+  KUBERNETES_LB_ADDRESS=192.168.5.30
+
+  kubectl config set-cluster test-cluster \
+    --certificate-authority=ca.crt \
+    --server=https://${KUBERNETES_LB_ADDRESS}:6443 \
+    --embed-certs=true \
+    --kubeconfig=syamsundar.kubeconfig
+
+  kubectl config set-credentials syamsundar \
+    --client-certificate=/home/vagrant/kubernetes-training/day6/syamsundar.crt \ 
+    --client-key=/home/vagrant/kubernetes-training/day6/syamsundar.key \
+    --embed-certs=true \
+    --kubeconfig=syamsundar.kubeconfig
+
+  kubectl config set-context test-cluster \
+    --cluster=test-cluster \
+    --user=syamsundar \
+    --kubeconfig=syamsundar.kubeconfig
+
+  kubectl config use-context test-cluster --kubeconfig=syamsundar.kubeconfig
+}
+
+NOTE: Get the user crt file after it's approved.
