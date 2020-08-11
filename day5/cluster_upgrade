@@ -1,5 +1,5 @@
 Step1: Check the Latest Stable Version
-#kubectl upgrade plan
+#kubeadm upgrade plan
 
 Step2: Drain the node one at a time to avoid application downtime. Drain the workload on the master and mark it Unschedulable
 #kubectl drain master --ignore-daemonsets
